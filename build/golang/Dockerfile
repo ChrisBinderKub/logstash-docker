@@ -1,4 +1,6 @@
-FROM golang:1.8
-RUN go get gopkg.in/yaml.v2
+FROM golang:alpine3.18
 WORKDIR /usr/local/src/env2yaml
-CMD ["go", "build"]
+CMD ["go"," mod download"]
+CMD ["go"," get"] 
+CMD ["go","build"]
+

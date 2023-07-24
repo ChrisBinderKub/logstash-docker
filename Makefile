@@ -35,7 +35,7 @@ lint: venv
 	flake8 tests
 
 build: dockerfile docker-compose env2yaml
-	docker pull centos:7
+	docker pull ubuntu:23.10
 	$(foreach FLAVOR, $(IMAGE_FLAVORS), \
 	  docker build -t $(IMAGE_TAG)-$(FLAVOR):$(VERSION_TAG) \
 	  -f build/logstash/Dockerfile-$(FLAVOR) build/logstash; \
@@ -116,7 +116,7 @@ golang:
 # variables.
 env2yaml: golang
 	docker run --rm -i \
-	  -v ${PWD}/build/logstash/env2yaml:/usr/local/src/env2yaml:Z \
+	  -v ${PWD}/build/logstash/env2yaml:/usr/local/src/env2yaml \
 	  golang:env2yaml
 
 # Generate the Dockerfiles from Jinja2 templates.

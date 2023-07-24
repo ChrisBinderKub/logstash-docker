@@ -8,34 +8,36 @@
 {% endif -%}
 
 {% if image_flavor == 'oss' -%}
-  {% set tarball = 'logstash-oss-%s.tar.gz' % elastic_version -%}
+  {% set tarball = 'logstash-oss-%s-linux-x86_64.tar.gz' % elastic_version -%}
 {% else -%}
-  {% set tarball = 'logstash-%s.tar.gz' % elastic_version -%}
+  {% set tarball = 'logstash-%s-linux-x86_64.tar.gz' % elastic_version -%}
 {% endif -%}
 
 
-FROM centos:7
+FROM ubuntu:23.10
 
 # Install Java and the "which" command, which is needed by Logstash's shell
 # scripts.
-RUN yum update -y && yum install -y java-1.8.0-openjdk-devel which && \
-    yum clean all
+RUN apt-get update -y && apt-get install -y which adduser curl openjdk-18-jre
 
+RUN mkdir -p /usr/share/logstash
 # Provide a non-root user to run the process.
-RUN groupadd --gid 1000 logstash && \
-    adduser --uid 1000 --gid 1000 \
-      --home-dir /usr/share/logstash --no-create-home \
-      logstash
-
+RUN groupadd --gid 1001 logstash && \
+    adduser --uid 1001 --gid 1001 \
+       --no-create-home \
+      logstash \
+      && usermod -d /usr/share/logstash logstash
+      
 # Add Logstash itself.
-RUN curl -Lo - {{ url_root }}/{{ tarball }} | \
-    tar zxf - -C /usr/share && \
+COPY ./logstash-8.8.2.tar.gz .
+RUN tar zxf logstash-8.8.2.tar.gz -C /usr/share && \
     mv /usr/share/logstash-{{ elastic_version }} /usr/share/logstash && \
     chown --recursive logstash:logstash /usr/share/logstash/ && \
     chown -R logstash:root /usr/share/logstash && \
     chmod -R g=u /usr/share/logstash && \
     find /usr/share/logstash -type d -exec chmod g+s {} \; && \
     ln -s /usr/share/logstash /opt/logstash
+
 
 WORKDIR /usr/share/logstash
 
